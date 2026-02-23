@@ -1,24 +1,25 @@
-const Header = ({ name }) => {
-  return <h1>{name}</h1>;
-};
+const Header = ({ name }) => <h1>{name}</h1>;
 
-const Part = ({ part }) => {
-  return (
-    <p>
-      {part.name} {part.exercises}
-    </p>
-  );
-};
+const Part = ({ part }) => (
+  <p>
+    {part.name} {part.exercises}
+  </p>
+);
 
-const Content = ({ parts }) => {
-  return (
-    <div>
-      {/* Exercise 2.1: Use map to render parts dynamically */}
-      {parts.map((part) => (
-        <Part key={part.id} part={part} />
-      ))}
-    </div>
-  );
+const Content = ({ parts }) => (
+  <div>
+    {parts.map((part) => (
+      <Part key={part.id} part={part} />
+    ))}
+  </div>
+);
+
+// NEW: Total component to calculate the sum
+const Total = ({ parts }) => {
+  // We extract the exercise numbers into an array, then sum them
+  const totalAmount = parts.reduce((sum, part) => sum + part.exercises, 0);
+
+  return <strong>total of {totalAmount} exercises</strong>;
 };
 
 const Course = ({ course }) => {
@@ -26,6 +27,7 @@ const Course = ({ course }) => {
     <div>
       <Header name={course.name} />
       <Content parts={course.parts} />
+      <Total parts={course.parts} />
     </div>
   );
 };
@@ -35,26 +37,10 @@ const App = () => {
     id: 1,
     name: "Half Stack application development",
     parts: [
-      {
-        name: "Fundamentals of React",
-        exercises: 10,
-        id: 1,
-      },
-      {
-        name: "Using props to pass data",
-        exercises: 7,
-        id: 2,
-      },
-      {
-        name: "State of a component",
-        exercises: 14,
-        id: 3,
-      },
-      {
-        name: "Redux",
-        exercises: 11,
-        id: 4,
-      },
+      { name: "Fundamentals of React", exercises: 10, id: 1 },
+      { name: "Using props to pass data", exercises: 7, id: 2 },
+      { name: "State of a component", exercises: 14, id: 3 },
+      { name: "Redux", exercises: 11, id: 4 },
     ],
   };
 
