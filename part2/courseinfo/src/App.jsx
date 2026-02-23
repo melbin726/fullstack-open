@@ -16,8 +16,11 @@ const Content = ({ parts }) => (
 
 // NEW: Total component to calculate the sum
 const Total = ({ parts }) => {
-  // We extract the exercise numbers into an array, then sum them
-  const totalAmount = parts.reduce((sum, part) => sum + part.exercises, 0);
+  const totalAmount = parts.reduce((sum, part) => {
+    // This will print to your browser console for every item in the array
+    console.log("what is happening", sum, part);
+    return sum + part.exercises;
+  }, 0);
 
   return <strong>total of {totalAmount} exercises</strong>;
 };
