@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import personService from "./services/persons"; // Import the service
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 
 const App = () => {
-  // Initialize with an empty array since data will come from the server
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
 
-  // Exercise 2.11: Fetching data from the server
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+    personService.getAll().then((initialPersons) => {
+      setPersons(initialPersons);
     });
-  }, []); // The empty dependency array ensures this runs only once after the first render
+  }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
@@ -33,20 +31,23 @@ const App = () => {
     const personObject = {
       name: newName,
       number: newNumber,
-      // We removed the manual ID generation because json-server
-      // will create a unique ID for us automatically!
     };
 
-    // Exercise 2.12: Send data to the server
-    axios
-      .post("http://localhost:3001/persons", personObject)
-      .then((response) => {
-        // response.data contains the person object returned by the server
-        // including the ID it generated
-        setPersons(persons.concat(response.data));
-        setNewName("");
-        setNewNumber("");
+    personService.create(personObject).then((returnedPerson) => {
+      setPersons(persons.concat(returnedPerson));
+      setNewName("");
+      setNewNumber("");
+    });
+  };
+
+  // Exercise 2.14: Delete functionality
+  const handleDelete = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personService.remove(id).then(() => {
+        // Filter out the deleted person from state to update UI
+        setPersons(persons.filter((p) => p.id !== id));
       });
+    }
   };
 
   const handleNameChange = (event) => setNewName(event.target.value);
@@ -75,7 +76,8 @@ const App = () => {
       />
 
       <h3>Numbers</h3>
-      <Persons persons={personsToShow} />
+      {/* Pass the delete handler to the Persons component */}
+      <Persons persons={personsToShow} deletePerson={handleDelete} />
     </div>
   );
 };
