@@ -33,13 +33,20 @@ const App = () => {
     const personObject = {
       name: newName,
       number: newNumber,
-      // Note: In later exercises, the server will handle ID generation
-      id: String(persons.length + 1),
+      // We removed the manual ID generation because json-server
+      // will create a unique ID for us automatically!
     };
 
-    setPersons(persons.concat(personObject));
-    setNewName("");
-    setNewNumber("");
+    // Exercise 2.12: Send data to the server
+    axios
+      .post("http://localhost:3001/persons", personObject)
+      .then((response) => {
+        // response.data contains the person object returned by the server
+        // including the ID it generated
+        setPersons(persons.concat(response.data));
+        setNewName("");
+        setNewNumber("");
+      });
   };
 
   const handleNameChange = (event) => setNewName(event.target.value);
