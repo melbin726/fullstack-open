@@ -1,11 +1,20 @@
 const express = require('express')
-const morgan = require('morgan') // Step 1: Import morgan
+const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
 
-// Exercise 3.7: Use morgan with 'tiny' configuration
-app.use(morgan('tiny')) 
+// Exercise 3.8: Creating a custom token for the request body
+morgan.token('body', (req, res) => {
+  // Only return the body if it's a POST request
+  if (req.method === 'POST') {
+    return JSON.stringify(req.body)
+  }
+  return ''
+})
+
+// Configure morgan to use the 'tiny' format + our new 'body' token
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 let persons = [
   { 
