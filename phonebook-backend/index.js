@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 
-// Middleware to parse JSON bodies from incoming requests
 app.use(express.json())
 
 let persons = [
@@ -30,14 +29,11 @@ let persons = [
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
+
 app.get('/info', (request, response) => {
   const entries = persons.length
   const date = new Date()
-  
-  const content = `
-    <p>Phonebook has info for ${entries} people</p>
-    <p>${date}</p>
-  `
+  const content = `<p>Phonebook has info for ${entries} people</p><p>${date}</p>`
   response.send(content)
 })
 
@@ -57,24 +53,29 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
-// Exercise 3.5: Adding a new person
+// Exercise 3.5 & 3.6: POST with validation
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
-  // Check if content is missing (Validation comes in 3.6, but we'll start here)
+  // 1. Check if name or number is missing
   if (!body.name || !body.number) {
     return response.status(400).json({ 
-      error: 'content missing' 
+      error: 'name or number is missing' 
     })
   }
 
-  // Generate a random ID (large range to avoid collisions)
-  const randomId = Math.floor(Math.random() * 1000000)
+  // 2. Check if name already exists in the phonebook
+  const nameExists = persons.some(p => p.name.toLowerCase() === body.name.toLowerCase())
+  if (nameExists) {
+    return response.status(400).json({ 
+      error: 'name must be unique' 
+    })
+  }
 
   const person = {
     name: body.name,
     number: body.number,
-    id: String(randomId)
+    id: String(Math.floor(Math.random() * 1000000))
   }
 
   persons = persons.concat(person)
