@@ -24,17 +24,14 @@ let persons = [
     }
 ]
 
-// Root route
 app.get('/', (request, response) => {
   response.send('<h1>Phonebook Backend</h1>')
 })
 
-// Exercise 3.1: Return hardcoded list of persons
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
-// Exercise 3.2: Info page
 app.get('/info', (request, response) => {
   const entries = persons.length
   const date = new Date()
@@ -44,6 +41,17 @@ app.get('/info', (request, response) => {
     <p>${date}</p>
   `
   response.send(content)
+})
+    //3.3
+app.get('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  const person = persons.find(p => p.id === id)
+
+  if (person) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
 })
 
 const PORT = 3001
