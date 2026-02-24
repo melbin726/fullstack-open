@@ -1,16 +1,11 @@
 import axios from 'axios'
 const baseUrl = 'http://localhost:3001/persons'
 
-const getAll = () => {
-  return axios.get(baseUrl).then(response => response.data)
-}
+const getAll = () => axios.get(baseUrl).then(res => res.data)
+const create = obj => axios.post(baseUrl, obj).then(res => res.data)
+const remove = id => axios.delete(`${baseUrl}/${id}`)
 
-const create = newObject => {
-  return axios.post(baseUrl, newObject).then(response => response.data)
-}
+// Exercise 2.15: Updating an existing resource
+const update = (id, obj) => axios.put(`${baseUrl}/${id}`, obj).then(res => res.data)
 
-const remove = (id) => {
-  return axios.delete(`${baseUrl}/${id}`)
-}
-
-export default { getAll, create, remove }
+export default { getAll, create, remove, update }
