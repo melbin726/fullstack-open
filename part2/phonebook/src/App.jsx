@@ -3,6 +3,7 @@ import personService from "./services/persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -10,44 +11,52 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
 
+  // States for the Notification system
+  const [infoMessage, setInfoMessage] = useState(null);
+  const [messageType, setMessageType] = useState("success");
+
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
       setPersons(initialPersons);
     });
   }, []);
 
+  // Helper function to show notifications and reset them
+  const showNotification = (message, type = "success") => {
+    setInfoMessage(message);
+    setMessageType(type);
+    setTimeout(() => {
+      setInfoMessage(null);
+    }, 5000);
+  };
+
   const addPerson = (event) => {
     event.preventDefault();
-
-    // Check if the person already exists
     const existingPerson = persons.find(
       (p) => p.name.toLowerCase() === newName.toLowerCase(),
     );
 
     if (existingPerson) {
-      // Exercise 2.15: Confirm update if person exists
-      const ok = window.confirm(
-        `${newName} is already added to phonebook, replace the old number with a new one?`,
-      );
-
-      if (ok) {
+      if (window.confirm(`${newName} is already added, replace number?`)) {
         const changedPerson = { ...existingPerson, number: newNumber };
 
         personService
           .update(existingPerson.id, changedPerson)
           .then((returnedPerson) => {
-            // Update the state: replace only the updated person
             setPersons(
               persons.map((p) =>
                 p.id !== existingPerson.id ? p : returnedPerson,
               ),
             );
+            showNotification(`Updated ${returnedPerson.name}'s number`);
             setNewName("");
             setNewNumber("");
           })
           .catch((error) => {
-            alert(
-              `The person '${existingPerson.name}' was already deleted from server`,
+            // Exercise 2.17: Handle error if person was already deleted from server
+            showNotification(
+              `Information of ${existingPerson.name} has already been removed from server`,
+              "error",
             );
             setPersons(persons.filter((p) => p.id !== existingPerson.id));
           });
@@ -55,11 +64,11 @@ const App = () => {
       return;
     }
 
-    // If person doesn't exist, create new
     const personObject = { name: newName, number: newNumber };
 
     personService.create(personObject).then((returnedPerson) => {
       setPersons(persons.concat(returnedPerson));
+      showNotification(`Added ${returnedPerson.name}`);
       setNewName("");
       setNewNumber("");
     });
@@ -67,9 +76,19 @@ const App = () => {
 
   const handleDelete = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
-      personService.remove(id).then(() => {
-        setPersons(persons.filter((p) => p.id !== id));
-      });
+      personService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter((p) => p.id !== id));
+          showNotification(`Deleted ${name}`);
+        })
+        .catch((error) => {
+          showNotification(
+            `Information of ${name} was already removed from server`,
+            "error",
+          );
+          setPersons(persons.filter((p) => p.id !== id));
+        });
     }
   };
 
@@ -83,15 +102,17 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={infoMessage} type={messageType} />
+
       <Filter value={filter} onChange={(e) => setFilter(e.target.value)} />
 
       <h3>Add a new</h3>
       <PersonForm
         onSubmit={addPerson}
-        nameValue={newName}
-        onNameChange={(e) => setNewName(e.target.value)}
-        numberValue={newNumber}
-        onNumberChange={(e) => setNewNumber(e.target.value)}
+        newName={newName}
+        handleNameChange={(e) => setNewName(e.target.value)}
+        newNumber={newNumber}
+        handleNumberChange={(e) => setNewNumber(e.target.value)}
       />
 
       <h3>Numbers</h3>
