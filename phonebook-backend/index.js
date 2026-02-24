@@ -1,7 +1,11 @@
 const express = require('express')
+const morgan = require('morgan') // Step 1: Import morgan
 const app = express()
 
 app.use(express.json())
+
+// Exercise 3.7: Use morgan with 'tiny' configuration
+app.use(morgan('tiny')) 
 
 let persons = [
   { 
@@ -53,23 +57,16 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
-// Exercise 3.5 & 3.6: POST with validation
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
-  // 1. Check if name or number is missing
   if (!body.name || !body.number) {
-    return response.status(400).json({ 
-      error: 'name or number is missing' 
-    })
+    return response.status(400).json({ error: 'name or number is missing' })
   }
 
-  // 2. Check if name already exists in the phonebook
   const nameExists = persons.some(p => p.name.toLowerCase() === body.name.toLowerCase())
   if (nameExists) {
-    return response.status(400).json({ 
-      error: 'name must be unique' 
-    })
+    return response.status(400).json({ error: 'name must be unique' })
   }
 
   const person = {
@@ -79,7 +76,6 @@ app.post('/api/persons', (request, response) => {
   }
 
   persons = persons.concat(person)
-
   response.json(person)
 })
 
